@@ -1,23 +1,28 @@
-import requests
+import requests, time, json
 
 
-rawData = requests.get("https://jobs.github.com/positions.json?page=1&search=code")
-jsonData1 = rawData.json()
+# Main function that retrieves the jobs and writes them to a file.
+def main():
+    jobs = get_jobs()
+    write_file(jobs)
 
-rawData = requests.get("https://jobs.github.com/positions.json?page=2&search=code")
-jsonData2 = rawData.json()
 
-rawData = requests.get("https://jobs.github.com/positions.json?page=3&search=code")
-jsonData3 = rawData.json()
+# Function that retrives the jobs.
+def get_jobs():
+    url = "https://jobs.github.com/positions.json?page="
+    totalJSON = []
+    for counter in range(1,6):
+        totalJSON += requests.get(url + str(counter)).json()
+        time.sleep(2)
+    return totalJSON
 
-jsonTotalData = jsonData1 + jsonData2 + jsonData3
 
-f = open("marieclancy.txt", "w")
+# Function that writes the data to a file.
+def write_file(data):
+    with open('jobs.txt', 'w') as openFile:
+        for job in data:
+            json.dump(job, openFile)
 
-print(len(jsonTotalData))
-for data in jsonTotalData:
-    print("\n")
-    print(data)
-    f.write(str(data) + '\n')
 
-f.close()
+if __name__ == '__main__':
+    main()
