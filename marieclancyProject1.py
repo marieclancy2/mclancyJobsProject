@@ -1,4 +1,6 @@
-import requests, time, json
+import requests
+import time
+import json
 
 
 # Main function that retrieves the jobs and writes them to a file.
@@ -11,7 +13,7 @@ def main():
 def get_jobs():
     url = "https://jobs.github.com/positions.json?page="
     totalJSON = []
-    for counter in range(1,6):
+    for counter in range(1, 6):
         totalJSON += requests.get(url + str(counter)).json()
         time.sleep(2)
     return totalJSON
