@@ -4,21 +4,22 @@ import json
 import sqlite3
 from typing import Tuple
 
+
 # function to open a database
-def open_db(filename:str)->Tuple[sqlite3.Connection, sqlite3.Cursor]:
+def open_db(filename: str)->Tuple[sqlite3.Connection, sqlite3.Cursor]:
     db_connection = sqlite3.connect(filename) # connect to existing DB or create new one
     cursor = db_connection.cursor() # get ready to read/write data
     return db_connection, cursor
 
 
 # Function to close a database
-def close_db(connection:sqlite3.Connection):
+def close_db(connection: sqlite3.Connection):
     connection.commit() # make sure any changes get saved
     connection.close()
 
 
 # Function to commit to database
-def commit_db(connection:sqlite3.Connection):
+def commit_db(connection: sqlite3.Connection):
     connection.commit()
 
 
@@ -35,7 +36,7 @@ def main():
 
 
 # Function that creates the table jobs
-def setup_db(cursor:sqlite3.Cursor, connection:sqlite3.Connection):
+def setup_db(cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS jobs( 
     id TEXT PRIMARY KEY,
@@ -53,7 +54,7 @@ def setup_db(cursor:sqlite3.Cursor, connection:sqlite3.Connection):
     connection.commit()
 
 
-def insert_to_database(cursor:sqlite3.Cursor, connection:sqlite3.Connection,  data: dict):
+def insert_to_database(cursor: sqlite3.Cursor, connection: sqlite3.Connection,  data: dict):
     if len(data) != 11:
         return
     try:

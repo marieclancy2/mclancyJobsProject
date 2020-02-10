@@ -61,4 +61,3 @@ def test_send_extra_data():
     assert cursor.fetchone() is None
 
     marieclancyProject1.close_db(conn)
-
