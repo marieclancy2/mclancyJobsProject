@@ -74,7 +74,7 @@ def main():
 # Function that creates the table jobs
 def setup_db(cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS jobs( 
+    CREATE TABLE IF NOT EXISTS jobs(
     id TEXT PRIMARY KEY,
     type TEXT,
     url TEXT NOT NULL,
