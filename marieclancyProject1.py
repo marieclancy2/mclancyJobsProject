@@ -36,9 +36,10 @@ def get_data_from_stackoverflow():
 
     return allJobs
 
+
 # function to open a database
-def open_db(filename: str)->Tuple[sqlite3.Connection, sqlite3.Cursor]:
-    db_connection = sqlite3.connect(filename) # connect to existing DB or create new one
+def open_db(filename: str) -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
+    db_connection = sqlite3.connect(filename)  # connect to existing DB or create new one
     cursor = db_connection.cursor()  # get ready to read/write data
     return db_connection, cursor
 
@@ -89,16 +90,17 @@ def setup_db(cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     connection.commit()
 
 
-def insert_to_database(cursor: sqlite3.Cursor, connection: sqlite3.Connection,  data: dict):
+def insert_to_database(cursor: sqlite3.Cursor, connection: sqlite3.Connection, data: dict):
     if len(data) != 11:
         return
     try:
         cursor.execute(f'''
         INSERT INTO jobs (id, type, url, company, company_url, created_at, location, title, description,
         how_to_apply, company_logo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (data['id'], data['type'], data['url'], data['company'], data['company_url'],
-                                                  data['created_at'], data['location'], data['title'], data['description'],
-                                                  data['how_to_apply'], data['company_logo'],))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+                       (data['id'], data['type'], data['url'], data['company'], data['company_url'],
+                        data['created_at'], data['location'], data['title'], data['description'],
+                        data['how_to_apply'], data['company_logo'],))
     except sqlite3.IntegrityError:
         pass
 
