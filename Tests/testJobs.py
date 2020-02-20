@@ -8,6 +8,25 @@ def test_get_jobs():
     assert type(jobs[1]) == dict
 
 
+# Test to check if the stackoverflow list returns more than 350 items.
+def test_get_stack_jobs():
+    jobs = marieclancyProject1.get_data_from_stackoverflow()
+    assert len(jobs) > 350
+    assert type(jobs[2]) == dict
+
+
+def test_if_data_in_database_from_stack_over_flow():
+    existingLocation = "Kowloon, Hong Kong"
+    conn, cursor = marieclancyProject1.open_db("test.sqlite")
+    marieclancyProject1.setup_db(cursor, conn)
+    jobs = marieclancyProject1.get_data_from_stackoverflow()
+    for job in jobs:
+        marieclancyProject1.insert_to_database(cursor, conn, job)
+    cursor.execute("SELECT * FROM jobs WHERE jobs.location = ?", (existingLocation,))
+    assert cursor.fetchone()
+    marieclancyProject1.close_db(conn)
+
+
 def test_insert_to_database():
     jobs = marieclancyProject1.get_jobs()
     existingTitle = "Web Full Stack Engineer"
