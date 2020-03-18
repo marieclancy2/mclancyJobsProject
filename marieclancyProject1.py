@@ -5,6 +5,9 @@ import json
 import sqlite3
 from typing import Tuple
 import ssl
+from geopy.geocoders import Nominatim
+import plotly.graph_objects as go
+import pandas as pd
 
 
 def get_data_from_stackoverflow():
@@ -57,6 +60,7 @@ def commit_db(connection: sqlite3.Connection):
 
 # Main function that retrieves the jobs and writes them to a file.
 def main():
+    geolocator = Nominatim(user_agent= "marieclancy")
     jobs = get_jobs()
     jobs2 = get_data_from_stackoverflow()
     write_file(jobs)
@@ -64,11 +68,25 @@ def main():
     setup_db(cursor, conn)
     conn.commit()
     for job in jobs:
-        insert_to_database(cursor, conn, job)
+        insert_to_database(cursor, conn, job, geolocator)
     for job in jobs2:
-        print(job)
-        insert_to_database(cursor, conn, job)
-    close_db(conn)
+        insert_to_database(cursor, conn, job, geolocator)
+
+    df = pd.read_sql_query('SELECT * FROM JOBS', conn)
+    df['text'] = df['location']
+
+    fig = go.Figure(data=go.Scattergeo(
+        lon=df['longitude'],
+        lat=df['latitude'],
+        text=df['text'],
+        mode='markers',
+    ))
+
+    fig.update_layout(
+        title='Marie Clancy project',
+        geo_scope='world',
+    )
+    fig.show()
 
 
 # Function that creates the table jobs
@@ -85,25 +103,46 @@ def setup_db(cursor: sqlite3.Cursor, connection: sqlite3.Connection):
     title TEXT,
     description TEXT NOT NULL,
     how_to_apply TEXT,
-    company_logo TEXT
+    company_logo TEXT,
+    latitude TEXT,
+    longitude TEXT
     );''')
     connection.commit()
 
 
-def insert_to_database(cursor: sqlite3.Cursor, connection: sqlite3.Connection, data: dict):
+def insert_to_database(cursor: sqlite3.Cursor, connection: sqlite3.Connection, data: dict, geolocator):
+    cursor.execute("SELECT latitude, latitude FROM JOBS WHERE JOBS.ID = ?", (data['id'], ))
+    if cursor.fetchone() is not None:
+        return
+
+    cursor.execute("SELECT latitude, longitude FROM JOBS WHERE JOBS.LOCATION = ?", (data['location'], ))
+    result = cursor.fetchone()
+    if result is not None:
+        latitude, longitude = result[0], result[1]
+    else:
+        if data['location'] is None or 'remote' in data['location'].lower():
+            longitude = None
+            latitude = None
+        else:
+            time.sleep(1)
+            location = geolocator.geocode(data['location'], timeout=1)
+            if location is None:
+                longitude, latitude = None, None
+            else:
+                longitude= location.longitude
+                latitude = location.latitude
     if len(data) != 11:
         return
     try:
         cursor.execute(f'''
         INSERT INTO jobs (id, type, url, company, company_url, created_at, location, title, description,
-        how_to_apply, company_logo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
+        how_to_apply, company_logo, latitude, longitude)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''',
                        (data['id'], data['type'], data['url'], data['company'], data['company_url'],
                         data['created_at'], data['location'], data['title'], data['description'],
-                        data['how_to_apply'], data['company_logo'],))
+                        data['how_to_apply'], data['company_logo'], latitude, longitude))
     except sqlite3.IntegrityError:
         pass
-
     connection.commit()
 
 

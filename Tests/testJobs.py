@@ -17,7 +17,7 @@ def test_get_stack_jobs():
 
 
 def test_if_data_in_database_from_stack_over_flow():
-    existingLocation = "Kowloon, Hong Kong"
+    existingLocation = "Kowloon,Hong Kong"
     conn, cursor = marieclancyProject1.open_db("test.sqlite")
     marieclancyProject1.setup_db(cursor, conn)
     jobs = marieclancyProject1.get_data_from_stackoverflow()
